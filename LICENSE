@@ -27,3 +27,8 @@ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+The code for the CaseInsensitiveDict (cid.py) is from the requests library which
+is governed by the Apache 2.0 license and copyright Kenneth Reitz. For more
+information about the licensing and source code of requests, see:
+https://requests.readthedocs.io/
