@@ -1,7 +1,10 @@
 # author: Drew Botwinick, Botwinick Innovations
 # license: 3-clause BSD
 
-from collections import Mapping
+try:
+    from collections import Mapping
+except ImportError:
+    from collections.abc import Mapping
 
 from .iterable import is_iterable
 

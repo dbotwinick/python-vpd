@@ -1,6 +1,9 @@
 # author: Drew Botwinick, Botwinick Innovations
 # license: 3-clause BSD
-from collections import Mapping
+try:
+    from collections import Mapping
+except ImportError:
+    from collections.abc import Mapping
 
 from six import string_types
 
@@ -12,8 +15,8 @@ def is_iterable(obj, strings=False, mappings=False, excluded_types=None):
     when checking if iterable), but option exists to include string-types to make this more accurate to its namesake.
 
     :param obj: object to check
-    :param strings: whether or not to consider strings as "iterable" for the purposes of this function
-    :param mappings: whether or not to consider Mappings as "iterable" for the purposes of this function
+    :param strings: whether to consider strings as "iterable" for the purposes of this function
+    :param mappings: whether to consider Mappings as "iterable" for the purposes of this function
     :param excluded_types: callable single-arg function or iterable of other types to exclude from considering iterable
     :return: True if iterable
     """

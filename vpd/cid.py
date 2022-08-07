@@ -16,7 +16,12 @@ License: Apache 2.0
 
 """
 
-from collections import Mapping, MutableMapping, OrderedDict
+from collections import OrderedDict
+
+try:
+    from collections import Mapping, MutableMapping
+except ImportError:
+    from collections.abc import Mapping, MutableMapping
 
 
 class CaseInsensitiveDict(MutableMapping):
