@@ -1,12 +1,16 @@
 # author: Drew Botwinick, Botwinick Innovations
 # license: 3-clause BSD
-import collections
 from os import path as osp
 
 import yaml
 from six import iteritems, string_types
 
 from .arguments import arg_substitute
+
+try:
+    from collections import Mapping
+except ImportError:
+    from collections.abc import Mapping
 
 
 def read_yaml(path, origin=None, return_path=False, windows_pseudo_links=True):
@@ -58,7 +62,7 @@ def shallow_merge_dicts(*data_dicts, **kwargs):
 
     result = dict()
     for include in data_dicts:
-        if not isinstance(include, collections.Mapping):  # skip non-dictionary inputs (intended for filtering Nones etc.)
+        if not isinstance(include, Mapping):  # skip non-dictionary inputs (intended for filtering Nones etc.)
             continue
         # result.update({k: v for (k, v) in include.iteritems() if v is not None or not skip_none_values})
         for k, v in iteritems(include):
@@ -79,7 +83,7 @@ def get_data(sub_dict, cwd=None):
     :param cwd:
     :return:
     """
-    if not isinstance(sub_dict, collections.Mapping):
+    if not isinstance(sub_dict, Mapping):
         return None
 
     data = dict(sub_dict)  # operate on a shallow copy
@@ -111,7 +115,7 @@ def vpd_chain(*mappings):
         if isinstance(mapping, VirtualPathDictChain):
             for sub_map in reversed(_unchain_vpd(mapping)):
                 vpd = VirtualPathDictChain(sub_map, vpd)
-        elif isinstance(mapping, collections.Mapping):
+        elif isinstance(mapping, Mapping):
             vpd = VirtualPathDictChain(mapping, vpd)
         elif mapping is not None:
             raise ValueError('all arguments must either be Mappings or VirtualPathDictChains')
@@ -218,9 +222,9 @@ class VirtualPathDictChain(object):
             r = self._data
             if r:
                 for arg in iter_key:
-                    if isinstance(r, collections.Mapping) and arg in r:
+                    if isinstance(r, Mapping) and arg in r:
                         r = r[arg]
-                    elif isinstance(r, collections.Mapping) and arg not in r:  # and not from_default:
+                    elif isinstance(r, Mapping) and arg not in r:  # and not from_default:
                         return self._fallback._get(iter_key) if self._fallback else None
                     else:
                         return None
@@ -249,7 +253,7 @@ class VirtualPathDictChain(object):
         l = len(iter_key)
         for i in range(l):
             arg = iter_key[i]
-            if i < l - 1 and isinstance(r, collections.Mapping) and arg not in r:  # not at end and missing arg, create missing dict
+            if i < l - 1 and isinstance(r, Mapping) and arg not in r:  # not at end and missing arg, create missing dict
                 r[arg] = dict()
             elif i == l - 1:
                 r[arg] = value
@@ -274,7 +278,7 @@ def vpd_data(vpd):
     if vpd and isinstance(vpd, VirtualPathDictChain):
         # noinspection PyProtectedMember
         return vpd._data
-    elif isinstance(vpd, collections.Mapping):
+    elif isinstance(vpd, Mapping):
         return vpd
     return None
 
@@ -296,7 +300,7 @@ class Settings(VirtualPathDictChain):
         self.file_name = file_name
         self.settings_file = osp.join(self.data_home, self.file_name)
         _current_dsf = self._dsf()
-        fallback = VirtualPathDictChain(_current_dsf, None) if isinstance(_current_dsf, collections.Mapping) else None
+        fallback = VirtualPathDictChain(_current_dsf, None) if isinstance(_current_dsf, Mapping) else None
         super(Settings, self).__init__(self._load(), fallback)
         self.refresh()
 
@@ -336,6 +340,6 @@ class Settings(VirtualPathDictChain):
         self.settings_file = osp.join(self.data_home, self.file_name)
         self._data = self._load()
         _current_dsf = self._dsf()
-        self._fallback = VirtualPathDictChain(_current_dsf, None) if isinstance(_current_dsf, collections.Mapping) else None
+        self._fallback = VirtualPathDictChain(_current_dsf, None) if isinstance(_current_dsf, Mapping) else None
         # TODO: reset TTL cache for get(...)
         return self
