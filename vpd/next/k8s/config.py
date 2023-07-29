@@ -17,6 +17,8 @@ except kubernetes.config.ConfigException:
 _v1 = kubernetes.client.CoreV1Api()
 _dc = kubernetes.dynamic.DynamicClient(_v1.api_client)
 
+client = _v1  # expose client because that could be convenient
+
 
 def truncate_name(name: str, field_name: str = None, limit=52):
     if name is None:
@@ -162,7 +164,7 @@ class NamespacedDataContainerManager(object):
     _resource_name_fn = None
 
     def __init__(self, kind='cm', namespace='default', identity_fn=None, resource_name_prefix=None, resource_name_suffix=None,
-                 identity_fn_static_override=None):
+                 identity_fn_static_override=None, default_data_field_name_prefix=''):
         self._namespace = namespace
 
         if identity_fn is None and identity_fn_static_override is None:
@@ -173,12 +175,12 @@ class NamespacedDataContainerManager(object):
         if kind == 'cm':
             self._kind = 'ConfigMap'
             self._resource_name_prefix = _CM_PREFIX if resource_name_prefix is None else resource_name_prefix
-            self._data_field_name_prefix = ''
+            self._data_field_name_prefix = default_data_field_name_prefix
             self._field_read = self._field_write = 'data'
         elif kind == 'secret':
             self._kind = 'Secret'
             self._resource_name_prefix = '' if resource_name_prefix is None else resource_name_prefix
-            self._data_field_name_prefix = ''
+            self._data_field_name_prefix = default_data_field_name_prefix
             self._field_read = 'data'
             self._field_write = 'stringData'
 
