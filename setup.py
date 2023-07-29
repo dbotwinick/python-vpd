@@ -7,7 +7,7 @@ with open("README.md", 'r') as f:
 
 setuptools.setup(
     name="vpd",
-    version="0.9.4",
+    version="0.9.10",
     author="Drew Botwinick",
     author_email="foss@drewbotwinick.com",
     description="VirtualPathDictChains. Hierarchical, Addressable Dicts, potentially using YaML",
@@ -19,10 +19,9 @@ setuptools.setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: BSD License',
         "Operating System :: OS Independent",
     ],
-    python_requires='>=2.7, >=3.6',
+    python_requires='>=3.9',
 )

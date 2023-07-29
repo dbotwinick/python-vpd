@@ -1,7 +1,11 @@
 # author: Drew Botwinick, Botwinick Innovations
 # license: 3-clause BSD
 
-from .arguments import arg_substitute
-from .cid import CaseInsensitiveDict
-from .iterable import flatten, is_iterable
-from .yaml_dict import VirtualPathDictChain, get_data, read_yaml, vpd_chain, vpd_data, vpd_get
+# this is a stub to provide backwards compatibility while transitioning code
+
+from .legacy.arguments import arg_substitute
+from .legacy.cid import CaseInsensitiveDict
+from .legacy.iterable import flatten, is_iterable
+from .legacy.yaml_dict import VirtualPathDictChain, get_data, vpd_chain, vpd_data, vpd_get
+
+from .next.util import read_yaml
