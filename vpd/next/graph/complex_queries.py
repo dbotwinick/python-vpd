@@ -19,11 +19,9 @@ def flex_dict_iter(src: list | dict):
     if isinstance(src, list):
         for s in src:
             # TODO: make it more flexible w/ recursion, this is single use-case now
-            for k, v in s.items():
-                yield k, v
+            yield from s.items()
     elif isinstance(src, dict):
-        for k, v in src.items():
-            yield k, v
+        yield from src.items()
 
 
 def typed_registries_iterator(global_model: dict, plugin_registry: PluginRegistry,

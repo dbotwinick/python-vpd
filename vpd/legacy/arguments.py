@@ -37,7 +37,7 @@ def variable_substitute(arg, data, flatten=False):
     subs = [data.get(m) for m in matches] if matches else None
     if matches and subs:
         ref_type = type(subs[0])
-        types_match = all(type(s) == ref_type for s in subs)
+        types_match = all(type(s) is ref_type for s in subs)
         if types_match and isinstance(subs[0], (list, string_types)):
             if len(subs) > 1:
                 return reduce(operator.add, subs)
