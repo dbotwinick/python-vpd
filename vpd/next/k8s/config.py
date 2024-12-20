@@ -3,7 +3,7 @@ import kubernetes
 import json
 from ..util import parse_yaml
 from base64 import b64decode
-from datetime import datetime
+from datetime import datetime, UTC
 
 _CM_PREFIX = 'cm-'
 POD_NAMESPACE = _os_getenv('POD_NAMESPACE', 'default')
@@ -36,7 +36,7 @@ def truncate_name(name: str, field_name: str = None, limit=52):
 
 # noinspection PyCompatibility
 def apply_yaml_object(body: dict, logger=None, verb='patch', create_on_fail=None, suppress_exceptions=False, timeout=30, **res_get_kwargs):
-    api_version = body.get('apiVersion', 'v1')
+    api_version = body.get('apiVersion', body.get('api_version', 'v1'))  # k8s api objects converted to dict will use "api_version"
     kind = body.get('kind', None)
     metadata = body.get('metadata', {})
     name = metadata.get('name', '???')
@@ -131,7 +131,7 @@ def trigger_cronjob(cronjob_name, man_suffix='man', namespace=POD_NAMESPACE, do_
         'kind': 'Job',
         'metadata': {
             # it's OK if we make a stupid long name because it'll be truncated automatically
-            'name': truncate_name(f"{cronjob.metadata.name}-{man_suffix}-{datetime.utcnow().timestamp()}", limit=60),
+            'name': truncate_name(f"{cronjob.metadata.name}-{man_suffix}-{datetime.now(UTC).timestamp()}", limit=60),
             'namespace': cronjob.metadata.namespace,
             'ownerReferences': [{
                 'apiVersion': 'v1',
