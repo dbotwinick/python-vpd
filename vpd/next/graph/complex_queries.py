@@ -3,7 +3,7 @@ from __future__ import annotations
 from copy import copy
 from fnmatch import fnmatch
 from itertools import chain
-from typing import Iterable
+from typing import Iterable, Optional
 
 from .model import TypeObject
 from .functions import extended_get_value
@@ -15,7 +15,7 @@ SEARCH_EXCLUDES = 'excludes'
 SPECIAL_KEYS = (SEARCH_NAMESPACE, SEARCH_EXCLUSIVE, SEARCH_EXCLUDES,)
 
 
-def flex_dict_iter(src: list | dict):
+def flex_dict_iter(src: Optional[list | dict]):
     if isinstance(src, list):
         for s in src:
             # TODO: make it more flexible w/ recursion, this is single use-case now
