@@ -1,9 +1,13 @@
-from os import getenv as _os_getenv
-import kubernetes
-import json
-from ..util import parse_yaml
 from base64 import b64decode
 from datetime import datetime, UTC
+from os import getenv as _os_getenv
+from typing import Any
+
+import json
+
+import kubernetes
+
+from ..util import parse_yaml
 
 _CM_PREFIX = 'cm-'
 POD_NAMESPACE = _os_getenv('POD_NAMESPACE', 'default')
@@ -35,13 +39,14 @@ def truncate_name(name: str, field_name: str = None, limit=52):
 
 
 # noinspection PyCompatibility
-def apply_yaml_object(body: dict, logger=None, verb='patch', create_on_fail=None, suppress_exceptions=False, timeout=30, **res_get_kwargs):
-    api_version = body.get('apiVersion', body.get('api_version', 'v1'))  # k8s api objects converted to dict will use "api_version"
+def apply_yaml_object(body: dict, logger=None, verb='patch', create_on_fail=None, suppress_exceptions=False, timeout=30,
+                      ssa_field_manager: str = None, **res_get_kwargs):
+    api_version = body.get('apiVersion', 'v1')
     kind = body.get('kind', None)
     metadata = body.get('metadata', {})
     name = metadata.get('name', '???')
     namespace = metadata.get('namespace', 'default')
-    fn_args = {'body': body, '_request_timeout': timeout}
+    fn_args: dict[str, Any] = {'body': body, '_request_timeout': timeout}
 
     # switch out first attempt function depending on what we're trying to accomplish
     if verb == 'patch':
@@ -77,11 +82,18 @@ def apply_yaml_object(body: dict, logger=None, verb='patch', create_on_fail=None
         fn_args['namespace'] = namespace
         del fn_args['body']
 
+    # add support for server-side apply by setting field manager and content type for default patch+create requests
+    if ssa_field_manager is not None:
+        fn_args['field_manager'] = ssa_field_manager
+        if verb == 'patch':
+            fn_args['_headers'] = {'Content-Type': 'application/apply-patch+yaml'}  # for native stuff... (direct requests)
+            fn_args['content_type'] = 'application/apply-patch+yaml'  # for CRDs... (indirect requests)
+
     # apply user-requested action as the first pass, hopefully it just works
     exc = None
     try:
         if logger:
-            logger.debug(f"Trying to {verb} {kind}: {namespace}/{name}")
+            logger.debug(f"Trying to {verb} {kind}: {namespace}/{name}; args=%s", fn_args)
         result = fn(**fn_args)
     except kubernetes.client.ApiException as r:
         result = None
@@ -92,7 +104,12 @@ def apply_yaml_object(body: dict, logger=None, verb='patch', create_on_fail=None
         if logger:
             logger.debug(f"Item not found, trying to create {kind}: {namespace}/{name}")
         try:
-            result = _dc.create(resource, body)
+            # When falling back to 'create' during an SSA patch, we must also pass the field_manager
+            # to the create call to properly claim field ownership.
+            if ssa_field_manager:
+                result = _dc.create(resource, body, field_manager=ssa_field_manager)
+            else:
+                result = _dc.create(resource, body)
             verb = 'create'  # update verb (for logging purposes) if we ended up using create
         except kubernetes.client.ApiException as r:
             raise r
